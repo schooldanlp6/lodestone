@@ -70,10 +70,6 @@ jobs:
       - name: Build Tauri desktop app
         uses: tauri-apps/tauri-action@v0
         id: tauri
-
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          TAURI_PRIVATE_KEY: ${{ secrets.TAURI_PRIVATE_KEY }}
         with:
           projectPath: ./dashboard
           tagName: ${{ inputs.version || null }}
@@ -85,25 +81,8 @@ jobs:
           includeDebug: ${{ inputs.debug }}
           includeRelease: ${{ !inputs.debug }}
 
-      - name: Add windows portable exe to release
-        uses: softprops/action-gh-release@v1
-        if: matrix.platform == 'windows-latest' && inputs.version
-        with:
-          files: |
-            ../target/release/Lodestone.exe
-            ../target/debug/Lodestone.exe
-          tag_name: ${{ inputs.version }}
-          draft: true
-          prerelease: true
-
-      # on windows, cache installer in src-tauri/target/release/bundle/msi/Lodestone*.msi
-      # on windows cache exe in src-tauri/target/release/Lodestone.exe
-      # on linux, cache deb in src-tauri/target/release/bundle/deb/lodestone*.deb
-      # on linux, cache appimage in src-tauri/target/release/bundle/appimage/lodestone*.AppImage
-      # note linux has lowercase l, windows has uppercase L
-
       - name: Upload artifacts
         uses: actions/upload-artifact@v3
         with:
           name: ${{ matrix.platform }}-tauri
-          path: "${{ join(fromJson(steps.tauri.outputs.artifactPaths), '\n') }}\n./src-tauri/target/release/Lodestone.exe\n./src-tauri/target/debug/Lodestone.exe"
+          path: "${{ join(fromJson(steps.tauri.outputs.artifactPaths), '\n') }}\n./src-tauri/target/release/Lodestone.AppImage\n./src-tauri/target/debug/Lodestone.AppImage"

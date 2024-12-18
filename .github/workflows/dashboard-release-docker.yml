@@ -18,10 +18,6 @@ env:
   REGISTRY: ghcr.io
   IMAGE_NAME: "${{ github.repository }}_dashboard"
 
-permissions:
-  contents: read
-  packages: write
-
 jobs:
   dashboard-release-docker:
     runs-on: ubuntu-latest
@@ -58,7 +54,7 @@ jobs:
         with:
           context: ./dashboard
           platforms: linux/amd64,linux/arm64
-          file: ./dashboard/Dockerfile
+          file: ./Dockerfile
           push: true
           tags: |
             ${{ steps.string_tag.outputs.lowercase }}:latest

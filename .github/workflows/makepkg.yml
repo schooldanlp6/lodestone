@@ -1,11 +1,11 @@
-name: Dashboard - Build and Draft Tauri App
+name: Dashboard - Build and Draft Frontend
 
 on:
   workflow_dispatch:
   workflow_call:
 
 jobs:
-  tauri-build-app:
+  dashboard-build-tauri-app:
     runs-on: ubuntu-latest
 
     steps:
@@ -19,32 +19,30 @@ jobs:
           cache: 'npm'
           cache-dependency-path: ./dashboard/package-lock.json
 
-      - name: Install dependencies (Node.js)
+      - name: Install Node.js dependencies
         run: npm ci
         working-directory: ./dashboard
 
-      - name: Install Rust
-        uses: actions-rs/toolchain@v1
+      - name: Set up Rust
+        uses: actions/setup-rust@v1
         with:
-          toolchain: stable
-          override: true
-          profile: minimal
-          components: rustfmt, clippy
+          rust-version: stable
 
-      - name: Install Tauri CLI
-        run: npm install -g @tauri-apps/cli
+      - name: Install Tauri dependencies
+        run: |
+          curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
+          source $HOME/.cargo/env
+          cargo install tauri-cli
+
+      - name: Build the Tauri app
+        run: |
+          source $HOME/.cargo/env
+          npm run tauri build
         working-directory: ./dashboard
 
-      - name: Build Tauri app
-        run: npm run tauri build
-        working-directory: ./dashboard
-
-      - name: Archive Tauri production artifacts
+      - name: Archive Tauri app artifacts
         uses: actions/upload-artifact@v3
         with:
           name: tauri-app-artifacts
           path: ./dashboard/target/release/*
-
-      - name: Clean up
-        run: rm -rf node_modules
 
